@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ChatModel vs ChatClient</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 500px;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 10px 5px 10px 0;
+            cursor: pointer;
+        }
+
+        .responses {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .response-column {
+            flex: 1;
+        }
+
+        .response-column h3 {
+            text-align: center;
+        }
+
+        .box {
+            border: 1px solid #ccc;
+            padding: 20px;
+            min-height: 250px;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>ChatModel vs ChatClient</h1>
+
+<input id="message" placeholder="Enter your message">
+
+<br>
+
+<button onclick="callChatModel()">
+    ChatModel Streaming
+</button>
+
+<button onclick="callChatClient()">
+    ChatClient Streaming
+</button>
+
+
+<div class="responses">
+
+    <div class="response-column">
+
+        <h3>ChatModel Response</h3>
+
+        <div id="chatModelResponse" class="box"></div>
+
+    </div>
+
+
+    <div class="response-column">
+
+        <h3>ChatClient Response</h3>
+
+        <div id="chatClientResponse" class="box"></div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    function callChatModel() {
+
+        const message = document.getElementById("message").value;
+        const output = document.getElementById("chatModelResponse");
+
+        output.innerHTML = "";
+
+        const eventSource = new EventSource(
+            "/api/chat-model/stream?message="
+            + encodeURIComponent(message)
+        );
+
+        eventSource.onmessage = function(event) {
+
+            output.innerHTML += event.data + " ";
+
+            // Automatically scroll to the latest response
+            output.scrollTop = output.scrollHeight;
+        };
+
+        eventSource.onerror = function() {
+
+            eventSource.close();
+        };
+    }
+
+
+    function callChatClient() {
+
+        const message = document.getElementById("message").value;
+        const output = document.getElementById("chatClientResponse");
+
+        output.innerHTML = "";
+
+        const eventSource = new EventSource(
+            "/api/chat-client/stream?message="
+            + encodeURIComponent(message)
+        );
+
+        eventSource.onmessage = function(event) {
+
+            output.innerHTML += event.data + " ";
+
+            // Automatically scroll to the latest response
+            output.scrollTop = output.scrollHeight;
+        };
+
+        eventSource.onerror = function() {
+
+            eventSource.close();
+        };
+    }
+
+</script>
+
+</body>
+</html>
